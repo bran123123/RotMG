@@ -13,7 +13,6 @@ const currency = new Discord.Collection();
 //All user input must begin with ?
 const PREFIX = '?';
 
-
 Reflect.defineProperty(currency, 'add', {
 	/* eslint-disable-next-line func-name-matching */
 	value: async function add(id, amount) {
@@ -95,11 +94,13 @@ client.on('message', async message => {
     	//Grabs user's current balance
 	const currentAmount = currency.getBalance(message.author.id);
 
+
     	//Grabs INT of amount
 	const transferAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
 
     	//Grabs mentioned user
 	const transferTarget = message.mentions.users.first();
+
 
     /*
 
@@ -108,13 +109,16 @@ client.on('message', async message => {
     */
 
     	//Not INT
-	if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount`);
+  if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount.`);
 
     	//Not enough
 	if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author} you don't have that much.`);
 
     	//Negative INT
 	if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
+
+      //Can't transfer to yourself
+
 
     	//Transfer action
 	currency.add(message.author.id, -transferAmount);
@@ -232,7 +236,7 @@ client.on('message', async message => {
       }
   }
   //Duel function
-/*
+
   else if (command === 'duel')
   {
 
@@ -244,23 +248,30 @@ client.on('message', async message => {
 
     	//Get mentioned user
     	const duelTarget = message.mentions.users.first();
+      message.channel.send(duelTarget);
 
+      //Get mentioned user Balance
+      const targetCurr = currency.getBalance(duelTarget);
+      message.channel.send(targetCurr);
     	/*
     	Conditions
     	*/
-      /*
+
     	//No @Mention
-    	if(!(user instanceof User)) return msg.send('You did not mention a user to duel.');
+    	//if(!(user instanceof User)) return message.channel.send('You did not mention a user to duel.');
 
     	//Can't duel yourself
-    	if (user.id === msg.author.id) return msg.send(`You cant duel yourself.`);
+    	//if (user.id === msg.author.id) return message.channel.send(`You cant duel yourself.`);
 
     	//Can't duel a bot
-	if (user.bot) return msg.send(`You cant duel a bot.`);
-    	if
+	    //if (user.bot) return message.channel.send(`You cant duel a bot.`);
 
-    	message.channel.send()
-    	if(duelTarget)
+      //Mentioned user too low balance
+    	//if(duelAmount > targetCurr) return message.channel.send(duelTarget.Mention + " does not have enough gold");
+
+      //Challenger has too low balance
+      //if(duelAmount > currentAmount) return message.channel.send(message.author.id + " does not have enough gold");
+
 
     	//RNG
     	random = Math.floor(Math.random() * 101);
@@ -310,9 +321,10 @@ client.on('message', async message => {
           //User did not accept duel
           message.channel.send('User did not accept in time');
           }
-      })
-  };
-  */
+      }
+    }
+  )}
+)}
 });
 
 //Starts client... place BOT_TOKEN in .env file
