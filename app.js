@@ -39,11 +39,11 @@ Reflect.defineProperty(currency, 'getBalance', {
 //Client Log on
 client.once('ready', async () => {
 
-  //Grab users
-	const storedBalances = await Users.findAll();
+  	//Grab users
+  	const storedBalances = await Users.findAll();
 	storedBalances.forEach(b => currency.set(b.user_id, b));
 
-  //Console confirmation
+  	//Console confirmation
 	console.log(`Logged in as ${client.user.tag}!`);
 
 });
@@ -51,55 +51,55 @@ client.once('ready', async () => {
 //Main
 client.on('message', async message => {
 
-  //TEMP Every message adds 1 gold
+  	//TEMP Every message adds 1 gold
 	if (message.author.bot) return;
 	currency.add(message.author.id, 1);
 
-  //Check: Message starts with ?
+  	//Check: Message starts with ?
 	if (!message.content.startsWith(PREFIX)) return;
 
-  //Grabs message after ?
+  	//Grabs message after ?
 	const input = message.content.slice(PREFIX.length).trim();
 
-  //input => command
+  	//input => command
 	if (!input.length) return;
 	const [, command, commandArgs] = input.match(/(\w+)\s*([\s\S]*)/);
 
-  //Balance command
+  	//Balance command
 	if (command === 'bal') {
 
-    //Grabs user balance
+    		//Grabs user balance
 		const target = message.mentions.users.first() || message.author;
 		return message.channel.send(`${target.tag} has ${currency.getBalance(target.id)}💰`);
 
-	}
+  }
   //Inventory command
   else if (command === 'inventory')
   {
-    //Grabs user
-		const target = message.mentions.users.first() || message.author;
-		const user = await Users.findOne({ where: { user_id: target.id } });
+    	//Grabs user
+	const target = message.mentions.users.first() || message.author;
+	const user = await Users.findOne({ where: { user_id: target.id } });
 
-    //Gets items
-		const items = await user.getItems();
+    	//Gets items
+	const items = await user.getItems();
 
-    //User has 0 items
-		if (!items.length) return message.channel.send(`${target.tag} has nothing!`);
+    	//User has 0 items
+	if (!items.length) return message.channel.send(`${target.tag} has nothing!`);
 
-    //Displays user items
-		return message.channel.send(`${target.tag} currently has ${items.map(t => `${t.amount} ${t.item.name}`).join(', ')}`);
-	}
+    	//Displays user items
+	return message.channel.send(`${target.tag} currently has ${items.map(t => `${t.amount} ${t.item.name}`).join(', ')}`);
+  }
   //Transfer gold function
   else if (command === 'transfer')
   {
-    //Grabs user's current balance
-		const currentAmount = currency.getBalance(message.author.id);
+    	//Grabs user's current balance
+	const currentAmount = currency.getBalance(message.author.id);
 
-    //Grabs INT of amount
-		const transferAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
+    	//Grabs INT of amount
+	const transferAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
 
-    //Grabs mentioned user
-		const transferTarget = message.mentions.users.first();
+    	//Grabs mentioned user
+	const transferTarget = message.mentions.users.first();
 
     /*
 
@@ -107,67 +107,67 @@ client.on('message', async message => {
 
     */
 
-    //Not INT
-		if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount`);
+    	//Not INT
+	if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount`);
 
-    //Not enough
-		if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author} you don't have that much.`);
+    	//Not enough
+	if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author} you don't have that much.`);
 
-    //Negative INT
-		if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
+    	//Negative INT
+	if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
 
-    //Transfer action
-		currency.add(message.author.id, -transferAmount);
-		currency.add(transferTarget.id, transferAmount);
+    	//Transfer action
+	currency.add(message.author.id, -transferAmount);
+	currency.add(transferTarget.id, transferAmount);
 
-    //Prompt complete
-		return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
+    	//Prompt complete
+	return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
 
-	}
+  }
   //Buy function
   else if (command === 'buy')
   {
-    //Finds item
-		const item = await CurrencyShop.findOne({ where: { name: { [Op.like]: commandArgs } } });
+    	//Finds item
+	const item = await CurrencyShop.findOne({ where: { name: { [Op.like]: commandArgs } } });
 
-    /*
+    	/*
 
-    Conditions
+    	Conditions
 
-    */
+    	*/
 
-    //Invalid item name
-		if (!item) return message.channel.send('That item doesn\'t exist.');
+    	//Invalid item name
+	if (!item) return message.channel.send('That item doesn\'t exist.');
 
-    //Not enough
-		if (item.cost > currency.getBalance(message.author.id)) {
+    	//Not enough
+	if (item.cost > currency.getBalance(message.author.id)) {
 			return message.channel.send(`You don't have enough currency, ${message.author}`);
-		}
-
-    //Grabs item
-		const user = await Users.findOne({ where: { user_id: message.author.id } });
-
-    //Takes money
-		currency.add(message.author.id, -item.cost);
-
-    //Adds item
-		await user.addItem(item);
-
-    //Prompt complete
-		message.channel.send(`You've bought a ${item.name}`);
-
-
 	}
+
+    	//Grabs item
+	const user = await Users.findOne({ where: { user_id: message.author.id } });
+
+    	//Takes money
+	currency.add(message.author.id, -item.cost);
+
+    	//Adds item
+	await user.addItem(item);
+
+    	//Prompt complete
+	message.channel.send(`You've bought a ${item.name}`);
+
+
+  }
   //Shop function
   else if (command === 'shop')
   {
-    //Grabs all item
-		const items = await CurrencyShop.findAll();
+    	//Grabs all item
+	const items = await CurrencyShop.findAll();
 
-    //Presents items
-		return message.channel.send(items.map(i => `${i.name}: ${i.cost}💰`).join('\n'), { code: true });
+    	//Presents items
+	return message.channel.send(items.map(i => `${i.name}: ${i.cost}💰`).join('\n'), { code: true });
 
-	}
+  }
   //Leaderboard function
   else if (command === 'leaderboard')
   {
@@ -175,43 +175,43 @@ client.on('message', async message => {
      return message.channel.send(
 
      //SQL sorting query
-	   currency.sort((a, b) => b.balance - a.balance)
-		.filter(user => client.users.cache.has(user.user_id))
+	currency.sort((a, b) => b.balance - a.balance)
+	.filter(user => client.users.cache.has(user.user_id))
 
-    //Grabs first 10 users
-		.first(10)
+    	//Grabs first 10 users
+	.first(10)
 
-    //Presentation
-		.map((user, position) => `(${position + 1}) ${(client.users.cache.get(user.user_id).tag)}: ${user.balance}💰`)
-		.join('\n'),
+    	//Presentation
+	.map((user, position) => `(${position + 1}) ${(client.users.cache.get(user.user_id).tag)}: ${user.balance}💰`)
+	.join('\n'),
 	{ code: true },
 );
-	}
+  }
   //Dicing function
   else if (command === 'dice')
   {
 
-      //Grabs current balance
-      const currentAmount = currency.getBalance(message.author.id);
+      	//Grabs current balance
+      	const currentAmount = currency.getBalance(message.author.id);
 
-      //User bet amount
-      const betAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
+      	//User bet amount
+      	const betAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
 
-      /*
-      Conditions
-      */
+      	/*
+      	Conditions
+      	*/
 
-      //Too much
-  		if (betAmount > currentAmount) return message.channel.send(`Sorry ${message.author} you don't have that much.`);
+      	//Too much
+  	if (betAmount > currentAmount) return message.channel.send(`Sorry ${message.author} you don't have that much.`);
 
-      //Negative INT
-  		if (betAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
+      	//Negative INT
+  	if (betAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
 
-      //RNG
-      random = Math.floor(Math.random() * 101);
+      	//RNG
+      	random = Math.floor(Math.random() * 101);
 
-      //Win
-      if(random >= 55) {
+      	//Win
+      	if(random >= 55) {
 
         //Adds bet
         currency.add(message.author.id, betAmount);
@@ -224,7 +224,7 @@ client.on('message', async message => {
       else if (random < 55)
       {
 
-        //Subtracts bet
+      	//Subtracts bet
         currency.add(message.author.id, -betAmount);
 
         //Prompt complete
@@ -235,47 +235,47 @@ client.on('message', async message => {
   else if (command === 'duel')
   {
 
-    //Current balance
-    const currentAmount = currency.getBalance(message.author.id);
+    	//Current balance
+    	const currentAmount = currency.getBalance(message.author.id);
 
-    //Amount dueled
-    const duelAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
+    	//Amount dueled
+    	const duelAmount = commandArgs.split(/ +/).find(arg => !/<@!?\d+>/.test(arg));
 
-    //Get mentioned user
-    const duelTarget = message.mentions.users.first();
+    	//Get mentioned user
+    	const duelTarget = message.mentions.users.first();
 
-    /*
-    Conditions
-    */
+    	/*
+    	Conditions
+    	*/
 
-    //No @Mention
-    if(!(user instanceof User)) return msg.send('You did not mention a user to duel.');
+    	//No @Mention
+    	if(!(user instanceof User)) return msg.send('You did not mention a user to duel.');
 
-    //Can't duel yourself
-    if (user.id === msg.author.id) return msg.send(`You cant duel yourself.`);
+    	//Can't duel yourself
+    	if (user.id === msg.author.id) return msg.send(`You cant duel yourself.`);
 
-    //Can't duel a bot
-		if (user.bot) return msg.send(`You cant duel a bot.`);
-    if
+    	//Can't duel a bot
+	if (user.bot) return msg.send(`You cant duel a bot.`);
+    	if
 
-    message.channel.send()
-    if(duelTarget)
+    	message.channel.send()
+    	if(duelTarget)
 
-    //RNG
-    random = Math.floor(Math.random() * 101);
-    random2 = Math.floor(Math.random() * 101);
+    	//RNG
+    	random = Math.floor(Math.random() * 101);
+    	random2 = Math.floor(Math.random() * 101);
 
-    //Asks mentioned user
-    message.channel.send(duelTarget.Mention + 'press y to accept the duel').then(() => {
+    	//Asks mentioned user
+    	message.channel.send(duelTarget.Mention + 'press y to accept the duel').then(() => {
 
-      //Waiting
-      message.channel.awaitMessages(filter, {
-        max: 1,
-        time: 30000,
-        errors: ['time']
-      })
-      .then(message => {
-        message = message.first()
+      	//Waiting
+      	message.channel.awaitMessages(filter, {
+        	max: 1,
+        	time: 30000,
+        	errors: ['time']
+      	})
+      	.then(message => {
+        	message = message.first()
 
         //Checks if 'y' or 'Y'
         if (message.content.toUpperCase() == 'Y' || message.content.toUpperCase() == 'Y') {
@@ -303,16 +303,15 @@ client.on('message', async message => {
             //Challenger loses money
             currency.add(message.author.id, -betAmount);
 
-        }
-        else
-        {
+          }
+          else
+          {
           //User did not accept duel
           message.channel.send('User did not accept in time');
-        }
+          }
       })
   };
 });
 
 //Starts client... place BOT_TOKEN in .env file
 client.login(process.env.BOT_TOKEN)
-
