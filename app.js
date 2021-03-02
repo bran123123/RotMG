@@ -10,7 +10,7 @@ const { Op } = require('sequelize');
 
 const currency = new Discord.Collection();
 
-//All user input must begin with ? 
+//All user input must begin with ?
 const PREFIX = '?';
 
 
@@ -232,6 +232,7 @@ client.on('message', async message => {
       }
   }
   //Duel function
+/*
   else if (command === 'duel')
   {
 
@@ -247,7 +248,7 @@ client.on('message', async message => {
     	/*
     	Conditions
     	*/
-
+      /*
     	//No @Mention
     	if(!(user instanceof User)) return msg.send('You did not mention a user to duel.');
 
@@ -311,6 +312,7 @@ client.on('message', async message => {
           }
       })
   };
+  */
 });
 
 //Starts client... place BOT_TOKEN in .env file
