@@ -211,6 +211,8 @@ client.on('message', async message => {
       	//Negative INT
   	if (betAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}`);
 
+        //Not INT
+    if (!betAmount || isNaN(betAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount.`);
       	//RNG
       	random = Math.floor(Math.random() * 101);
 
